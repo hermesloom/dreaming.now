@@ -4,4 +4,6 @@ In progress, see [here](https://docs.google.com/presentation/d/1GaoEtU69S7YOjw9s
 
 Last update: 2025-02-05
 
+Contact: synergies@dreaming.now
+
 License: GPL
