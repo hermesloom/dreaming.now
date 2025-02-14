@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       {
         source: "/",
         destination:
-          "https://docs.google.com/presentation/d/1GaoEtU69S7YOjw9sFDs3oIEL8wkDOZ6rIE2wrnjDcz0/edit",
+          "https://docs.google.com/presentation/d/1YsJKmBFVZL3nt3xpBfx1A6Ml2X-Phnve-H_t8KTnsi8/edit",
         permanent: true,
       },
     ];
