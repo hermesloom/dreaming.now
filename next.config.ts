@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
+import nextWithIntl from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Enable static page optimization
+  reactStrictMode: true,
+
+  // Configure image domains for external images
+  images: {
+    domains: ["divizend.com"],
+  },
 };
 
-export default nextConfig;
+const withNextIntl = nextWithIntl("./i18n.ts");
+
+export default withNextIntl(nextConfig);

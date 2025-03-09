@@ -1,0 +1,70 @@
+{
+  "app": {
+    "brainstorm": "Brainstorm",
+    "distribute": "Distribute",
+    "until": "until {date}"
+  },
+  "header": {
+    "logout": "Log out"
+  },
+  "login": {
+    "welcome": "Welcome to Divizend",
+    "description": "Log in to access collaborative idea management and resource distribution",
+    "loginButton": "Log In"
+  },
+  "subscription": {
+    "subscriptionRequired": "Subscription Required",
+    "subscriptionDescription": "To access this feature, you need to subscribe to the Divizend Companion",
+    "upgrade": "Upgrade",
+    "logout": "Log Out"
+  },
+  "brainstorm": {
+    "missingIdea": "Didn't find what you were looking for?",
+    "addNew": "Add new idea"
+  },
+  "distribute": {
+    "budgetRemaining": "You still have {amount} to distribute",
+    "finalizeSprint": "Finalize sprint",
+    "allocate": "Allocate",
+    "adjust": "Adjust",
+    "allocateTo": "Allocate to",
+    "allocateFunds": "Allocate funds",
+    "amount": "Amount",
+    "maxAllocation": "Maximum allocation: {amount}",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirmFinalize": "Confirm finalization",
+    "finalizeDescription": "This will finalize your distribution for the current sprint. You won't be able to make changes afterward.",
+    "allocated": "Total allocated",
+    "remaining": "Remaining budget"
+  },
+  "ideaDetail": {
+    "details": "Details",
+    "issues": "Issues",
+    "title": "Title",
+    "titlePlaceholder": "Enter a title for your idea",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter a short description",
+    "content": "Content",
+    "contentPlaceholder": "Write detailed content using Markdown",
+    "admin": "Administrator",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "create": "Create",
+    "noIssues": "No issues yet",
+    "addIssue": "Add issue",
+    "issuePlaceholder": "Describe your issue or question",
+    "submit": "Submit",
+    "resolve": "Resolve",
+    "reject": "Reject",
+    "resolved": "Resolved",
+    "rejected": "Rejected"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  }
+}
