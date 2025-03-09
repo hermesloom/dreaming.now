@@ -50,7 +50,7 @@ export function ThemeProvider({
       setTheme("system");
       root.setAttribute(attribute, systemTheme);
     }
-  }, []);
+  }, [storageKey, attribute, enableSystem]);
 
   useEffect(() => {
     const root = window.document.documentElement;

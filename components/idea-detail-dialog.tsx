@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/context/auth-context";
-import { useIdeas, Idea, Issue } from "@/context/ideas-context";
+import { useIdeas, Idea } from "@/context/ideas-context";
 import {
   Dialog,
   DialogContent,

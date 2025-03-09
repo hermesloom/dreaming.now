@@ -16,11 +16,21 @@ interface EmojiPickerProps {
   onChange: (emoji: string) => void;
 }
 
+// Define a proper type for the emoji object
+interface EmojiObject {
+  id: string;
+  name: string;
+  native: string;
+  unified: string;
+  keywords: string[];
+  shortcodes?: string;
+}
+
 export default function EmojiPicker({ value, onChange }: EmojiPickerProps) {
   const [open, setOpen] = useState(false);
   const { theme } = useTheme();
 
-  const handleSelect = (emoji: any) => {
+  const handleSelect = (emoji: EmojiObject) => {
     onChange(emoji.native);
     setOpen(false);
   };
