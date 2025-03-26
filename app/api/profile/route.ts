@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/auth";
+import { Profile } from "@/lib/types";
 
 export const GET = withAuth(async (req: NextRequest, user) => {
   try {
@@ -9,10 +10,11 @@ export const GET = withAuth(async (req: NextRequest, user) => {
     }
 
     // Return user profile data
-    return NextResponse.json({
+    const profile: Profile = {
       id: user.id,
-      funds: user.funds,
-    });
+      isAdmin: user.isAdmin,
+    };
+    return NextResponse.json(profile);
   } catch (error) {
     console.error("Profile API error:", error);
     return NextResponse.json(

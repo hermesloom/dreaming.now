@@ -1,6 +1,6 @@
 export interface Profile {
   id: string;
-  funds: number;
+  isAdmin: boolean;
 }
 
 export interface Session {

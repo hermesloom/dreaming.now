@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Shield } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,13 +10,22 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import LoginButton from "@/components/LoginButton";
+import { useSession } from "@/contexts/SessionContext";
 
 interface HeaderProps {
   onAddProject: () => void;
 }
 
 export default function Header({ onAddProject }: HeaderProps) {
+  const { profile } = useSession();
+
   return (
     <header className="w-full py-4 px-6 border-b flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -48,6 +57,20 @@ export default function Header({ onAddProject }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
+        {profile?.isAdmin && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-primary">
+                  <Shield size={20} />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>You have admin access</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
         <LoginButton />
       </div>
     </header>
