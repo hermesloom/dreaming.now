@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AuthRequest, AuthOrigin, DivizendProfile } from "@/lib/auth";
+import { AuthRequest, AuthOrigin } from "@/lib/auth";
 import { PrismaClient } from "@/generated/prisma";
 
 const prisma = new PrismaClient();
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       if (!divizendProfileRequest.ok) {
         throw new Error("Failed to fetch profile");
       }
-      const divizendProfile: DivizendProfile =
+      const divizendProfile: { id: string } =
         await divizendProfileRequest.json();
 
       // check if the user exists in the database. If not, create a new user
