@@ -37,23 +37,6 @@ export default function Header({ onAddProject }: HeaderProps) {
           priority
           className="mr-4"
         />
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
-              Divizend Live
-              <ChevronDown size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Divizend Live</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onAddProject}>
-              <Plus size={16} className="mr-2" />
-              Add your own project
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       <div className="flex items-center gap-4">

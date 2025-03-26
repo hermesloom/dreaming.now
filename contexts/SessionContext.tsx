@@ -35,7 +35,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       console.log("Refreshing profile");
       const response = await fetch("/api/profile", {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${sessionToken}`,
         },
       });
