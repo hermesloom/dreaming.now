@@ -26,8 +26,11 @@ export default function LoginButton() {
     );
   }
 
+  const environment =
+    process.env.NODE_ENV === "production" ? "dreaming.now" : "local-dev";
+
   return (
-    <a href="https://api.divizend.com/v1/auth?app=local-dev">
+    <a href={`https://api.divizend.com/v1/auth?app=${environment}`}>
       <Button variant="default">Login with Divizend</Button>
     </a>
   );
