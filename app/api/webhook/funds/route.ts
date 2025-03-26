@@ -52,20 +52,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user funds
-    const updatedUser = await prisma.user.update({
+    /*const updatedUser = await prisma.user.update({
       where: { id: payload.userId },
       data: {
         funds: { increment: payload.amount },
       },
-    });
+    });*/
 
     // Return the updated user data
     return NextResponse.json({
       success: true,
-      user: {
+      /*user: {
         id: updatedUser.id,
         funds: updatedUser.funds,
-      },
+      },*/
     });
   } catch (error) {
     console.error("Webhook error:", error);
