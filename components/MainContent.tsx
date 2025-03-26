@@ -4,9 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   PlusCircle,
-  ExternalLink,
   MoreHorizontal,
-  ChevronRight,
   Search,
   Loader2,
   ArrowRight,

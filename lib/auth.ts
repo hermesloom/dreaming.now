@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient, User } from "@/generated/prisma";
 
 export enum AuthOrigin {
   Divizend = "divizend",
-}
-
-export interface DivizendProfile {
-  id: string;
-  // Add other fields as needed
 }
 
 export interface AuthRequest {
@@ -19,7 +14,7 @@ export interface AuthRequest {
 
 // Higher-order function to protect API routes with authentication
 export function withAuth(
-  handler: (req: NextRequest, user: any) => Promise<NextResponse>
+  handler: (req: NextRequest, user: User) => Promise<NextResponse>
 ) {
   return async (req: NextRequest) => {
     const prisma = new PrismaClient();

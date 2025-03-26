@@ -1,15 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, Plus, Shield } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { Shield } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -19,11 +11,7 @@ import {
 import LoginButton from "@/components/LoginButton";
 import { useSession } from "@/contexts/SessionContext";
 
-interface HeaderProps {
-  onAddProject: () => void;
-}
-
-export default function Header({ onAddProject }: HeaderProps) {
+export default function Header() {
   const { profile } = useSession();
 
   return (

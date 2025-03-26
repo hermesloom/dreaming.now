@@ -1,13 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useSession } from "@/contexts/SessionContext";
 
 export default function LoginButton() {
-  const { profile, profileLoading, refreshProfile, logout } = useSession();
+  const { profile, profileLoading, logout } = useSession();
 
   // Show loading indicator while profile is loading
   if (profileLoading) {
