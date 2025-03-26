@@ -13,10 +13,10 @@ function validateSlug(slug: string): boolean {
 // GET - Get a single project by slug
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const project = await prisma.project.findUnique({
       where: { slug },
@@ -39,10 +39,10 @@ export async function GET(
 // PUT - Update a project
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const { name, description, newSlug } = await request.json();
 
     if (!name && !description && !newSlug) {
@@ -108,10 +108,10 @@ export async function PUT(
 // DELETE - Delete a project
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const existingProject = await prisma.project.findUnique({
       where: { slug },
