@@ -203,7 +203,7 @@ export default function ProjectList() {
   };
 
   return (
-    <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
+    <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold">Projects</h1>
 
@@ -418,6 +418,6 @@ export default function ProjectList() {
         onOpenChange={setDeleteDialogOpen}
         onProjectDeleted={handleProjectDeleted}
       />
-    </main>
+    </div>
   );
 }
