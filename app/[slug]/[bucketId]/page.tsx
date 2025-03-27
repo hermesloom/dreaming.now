@@ -3,13 +3,33 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Home, ChevronRight, Loader2 } from "lucide-react";
+import {
+  Home,
+  ChevronRight,
+  Loader2,
+  BadgeEuro,
+  PlusCircle,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { fetchAuth } from "@/lib/fetch";
 import { Progress } from "@/components/ui/progress";
 import ReactMarkdown from "react-markdown";
+import BucketProgressBar from "@/components/buckets/BucketProgressBar";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import AssignFundsButton from "@/components/buckets/AssignFundsButton";
+import AddBudgetItemDialog from "@/components/buckets/AddBudgetItemDialog";
+import EditBudgetItemDialog from "@/components/buckets/EditBudgetItemDialog";
+import DeleteBudgetItemDialog from "@/components/buckets/DeleteBudgetItemDialog";
 
 interface BudgetItem {
   id: string;
@@ -41,17 +61,24 @@ interface Project {
   id: string;
   name: string;
   slug: string;
+  userFunds: number;
 }
 
 export default function BucketDetail() {
   const params = useParams();
   const projectSlug = params.slug as string;
-  const bucketId = params.id as string;
+  const bucketId = params.bucketId as string;
 
   const [bucket, setBucket] = useState<Bucket | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [addBudgetItemOpen, setAddBudgetItemOpen] = useState(false);
+  const [editBudgetItemOpen, setEditBudgetItemOpen] = useState(false);
+  const [deleteBudgetItemOpen, setDeleteBudgetItemOpen] = useState(false);
+  const [currentBudgetItem, setCurrentBudgetItem] = useState<BudgetItem | null>(
+    null
+  );
 
   // Calculate totals
   const totalBudget =
@@ -110,6 +137,48 @@ export default function BucketDetail() {
     fetchBucketDetails();
   }, [projectSlug, bucketId]);
 
+  const handleEditBudgetItem = (item: BudgetItem) => {
+    setCurrentBudgetItem(item);
+    setEditBudgetItemOpen(true);
+  };
+
+  const handleDeleteBudgetItem = (item: BudgetItem) => {
+    setCurrentBudgetItem(item);
+    setDeleteBudgetItemOpen(true);
+  };
+
+  const handleCreateBudgetItem = (item: BudgetItem) => {
+    setBucket((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        budgetItems: [item, ...prev.budgetItems],
+      };
+    });
+  };
+
+  const handleUpdateBudgetItem = (updatedItem: BudgetItem) => {
+    setBucket((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        budgetItems: prev.budgetItems.map((item) =>
+          item.id === updatedItem.id ? updatedItem : item
+        ),
+      };
+    });
+  };
+
+  const handleDeleteBudgetItemSuccess = (deletedId: string) => {
+    setBucket((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        budgetItems: prev.budgetItems.filter((item) => item.id !== deletedId),
+      };
+    });
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -160,16 +229,22 @@ export default function BucketDetail() {
 
               {/* Progress Bar */}
               <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">
-                    Funding Progress: {progressPercentage}%
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatCurrency(totalPledged)} of{" "}
-                    {formatCurrency(totalBudget)}
-                  </span>
-                </div>
-                <Progress value={progressPercentage} className="h-2" />
+                <BucketProgressBar
+                  totalBudget={totalBudget}
+                  totalPledged={totalPledged}
+                />
+              </div>
+
+              {/* Assign Funds Button */}
+              <div className="mt-4">
+                <AssignFundsButton
+                  projectSlug={projectSlug}
+                  bucketId={bucketId}
+                  bucketTitle={bucket?.title || ""}
+                  status={bucket?.status || "CLOSED"}
+                  userFunds={project?.userFunds || 0}
+                  onFundsAssigned={fetchBucketDetails}
+                />
               </div>
             </div>
 
@@ -185,25 +260,56 @@ export default function BucketDetail() {
 
             {/* Budget Items */}
             <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">Budget Items</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Budget Items</h2>
+                <Button
+                  size="sm"
+                  onClick={() => setAddBudgetItemOpen(true)}
+                  disabled={bucket.status !== "OPEN"}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              </div>
+
               {bucket.budgetItems.length > 0 ? (
                 <div className="border rounded-md overflow-hidden">
                   <div className="bg-muted/50 p-3 hidden md:flex text-sm font-medium text-muted-foreground">
                     <div className="flex-1">Description</div>
                     <div className="w-32 text-right">Amount</div>
+                    {bucket.status === "OPEN" && <div className="w-24"></div>}
                   </div>
                   <div className="divide-y">
                     {bucket.budgetItems.map((item) => (
                       <div
                         key={item.id}
-                        className="p-3 flex flex-col md:flex-row"
+                        className="p-3 flex flex-col md:flex-row items-center"
                       >
-                        <div className="flex-1 mb-2 md:mb-0">
+                        <div className="flex-1 mb-2 md:mb-0 w-full md:w-auto">
                           <div className="font-medium">{item.description}</div>
                         </div>
-                        <div className="w-full md:w-32 text-left md:text-right font-medium">
+                        <div className="w-full md:w-32 text-left md:text-right font-medium mb-2 md:mb-0">
                           {formatCurrency(item.amount, item.currency)}
                         </div>
+                        {bucket.status === "OPEN" && (
+                          <div className="w-full md:w-24 flex justify-end space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditBudgetItem(item)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteBudgetItem(item)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -227,6 +333,29 @@ export default function BucketDetail() {
         )}
       </main>
       <Footer />
+      <AddBudgetItemDialog
+        projectSlug={projectSlug}
+        bucketId={bucketId}
+        open={addBudgetItemOpen}
+        onOpenChange={setAddBudgetItemOpen}
+        onBudgetItemCreated={handleCreateBudgetItem}
+      />
+      <EditBudgetItemDialog
+        projectSlug={projectSlug}
+        bucketId={bucketId}
+        budgetItem={currentBudgetItem}
+        open={editBudgetItemOpen}
+        onOpenChange={setEditBudgetItemOpen}
+        onBudgetItemUpdated={handleUpdateBudgetItem}
+      />
+      <DeleteBudgetItemDialog
+        projectSlug={projectSlug}
+        bucketId={bucketId}
+        budgetItem={currentBudgetItem}
+        open={deleteBudgetItemOpen}
+        onOpenChange={setDeleteBudgetItemOpen}
+        onBudgetItemDeleted={handleDeleteBudgetItemSuccess}
+      />
     </div>
   );
 }

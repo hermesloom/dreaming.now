@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, BadgeEuro } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,6 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import AssignFundsButton from "@/components/buckets/AssignFundsButton";
 
 interface Bucket {
   id: string;
@@ -18,6 +20,14 @@ interface Bucket {
   description: string;
   status: "OPEN" | "CLOSED";
   createdAt: string;
+  budgetItems?: {
+    id: string;
+    amount: number;
+  }[];
+  pledges?: {
+    id: string;
+    amount: number;
+  }[];
 }
 
 interface BucketItemProps {
@@ -25,6 +35,8 @@ interface BucketItemProps {
   projectSlug: string;
   onEdit: (bucket: Bucket) => void;
   onDelete: (bucket: Bucket) => void;
+  userFunds: number;
+  onFundsAssigned?: () => void;
 }
 
 export default function BucketItem({
@@ -32,6 +44,8 @@ export default function BucketItem({
   projectSlug,
   onEdit,
   onDelete,
+  userFunds,
+  onFundsAssigned,
 }: BucketItemProps) {
   const router = useRouter();
 
@@ -46,6 +60,7 @@ export default function BucketItem({
   };
 
   const navigateToBucket = () => {
+    console.log("navigating!");
     router.push(`/${projectSlug}/${bucket.id}`);
   };
 
@@ -64,6 +79,28 @@ export default function BucketItem({
     });
   };
 
+  // Calculate totals for the progress bar
+  const totalBudget =
+    bucket.budgetItems?.reduce((sum, item) => sum + item.amount, 0) || 0;
+
+  const totalPledged =
+    bucket.pledges?.reduce((sum, pledge) => sum + pledge.amount, 0) || 0;
+
+  // Add the progressPercentage calculation
+  const progressPercentage =
+    totalBudget > 0
+      ? Math.min(Math.round((totalPledged / totalBudget) * 100), 100)
+      : 0;
+
+  // Format currency function
+  const formatCurrency = (amount: number, currency: string = "EUR") => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency,
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
   return (
     <div
       onClick={navigateToBucket}
@@ -72,7 +109,14 @@ export default function BucketItem({
       <div className="flex flex-col md:flex-row p-4 gap-3">
         <div className="flex-1">
           <div className="flex flex-col md:flex-row gap-2 md:items-center mb-1">
-            <h3 className="font-medium">{bucket.title}</h3>
+            <h3 className="font-medium">
+              <Link
+                href={`/${projectSlug}/${bucket.id}`}
+                className="hover:underline"
+              >
+                {bucket.title}
+              </Link>
+            </h3>
             <div className="flex items-center gap-2">
               {getStatusBadge(bucket.status)}
               <span className="text-xs text-muted-foreground">
@@ -83,6 +127,16 @@ export default function BucketItem({
           <p className="text-sm text-muted-foreground line-clamp-2">
             {bucket.description}
           </p>
+
+          {/* Funding info and assign button */}
+          <div className="flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center mt-2 mb-1">
+            <div className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {progressPercentage}% funded
+              </span>{" "}
+              · Budget: {formatCurrency(totalBudget)}
+            </div>
+          </div>
         </div>
         <div className="flex items-center justify-end">
           <DropdownMenu>

@@ -165,15 +165,20 @@ export default function ProjectDetail() {
               </div>
             ) : (
               <div className="border rounded-lg overflow-hidden divide-y">
-                {filteredBuckets.map((bucket) => (
-                  <BucketItem
-                    key={bucket.id}
-                    bucket={bucket}
-                    projectSlug={slug}
-                    onEdit={handleEditBucket}
-                    onDelete={handleDeleteBucketAction}
-                  />
-                ))}
+                {filteredBuckets.map(
+                  (bucket) =>
+                    bucket.status === "OPEN" && (
+                      <BucketItem
+                        key={bucket.id}
+                        bucket={bucket}
+                        projectSlug={project.slug}
+                        onEdit={() => handleEditBucket(bucket)}
+                        onDelete={() => handleDeleteBucket(bucket.id)}
+                        userFunds={project.userFunds}
+                        onFundsAssigned={fetchProject}
+                      />
+                    )
+                )}
               </div>
             )}
 

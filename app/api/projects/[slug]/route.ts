@@ -19,6 +19,20 @@ export const GET = withAuth(async (request: NextRequest, user, { slug }) => {
       include: {
         buckets: {
           orderBy: { createdAt: "desc" },
+          include: {
+            budgetItems: {
+              select: {
+                id: true,
+                amount: true,
+              },
+            },
+            pledges: {
+              select: {
+                id: true,
+                amount: true,
+              },
+            },
+          },
         },
         userFunds: {
           where: { userId: user.id },
