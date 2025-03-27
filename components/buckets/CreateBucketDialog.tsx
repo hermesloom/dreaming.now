@@ -82,15 +82,16 @@ export default function CreateBucketDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Create New Bucket</DialogTitle>
           <DialogDescription>
             Create a new bucket to collect ideas for the project.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleCreateBucket}>
-          <div className="space-y-4 py-4">
+
+        <form onSubmit={handleCreateBucket} className="flex flex-col flex-1">
+          <div className="space-y-4 py-4 overflow-y-auto px-1">
             <div className="space-y-2">
               <label htmlFor="title" className="text-sm font-medium">
                 Title
@@ -117,10 +118,12 @@ export default function CreateBucketDialog({
                 }
                 placeholder="Bucket description"
                 required
+                className="min-h-[150px] max-h-[300px] resize-none overflow-y-auto"
               />
             </div>
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="flex-shrink-0 pt-2">
             <Button
               type="button"
               variant="outline"

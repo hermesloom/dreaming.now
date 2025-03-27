@@ -106,21 +106,22 @@ export default function EditBucketDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Edit Bucket</DialogTitle>
           <DialogDescription>
-            Make changes to the bucket details.
+            Update the bucket details and status.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleUpdateBucket}>
-          <div className="space-y-4 py-4">
+
+        <form onSubmit={handleUpdateBucket} className="flex flex-col flex-1">
+          <div className="space-y-4 py-4 overflow-y-auto px-1">
             <div className="space-y-2">
-              <label htmlFor="edit-title" className="text-sm font-medium">
+              <label htmlFor="title" className="text-sm font-medium">
                 Title
               </label>
               <Input
-                id="edit-title"
+                id="title"
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
@@ -130,31 +131,35 @@ export default function EditBucketDialog({
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="edit-description" className="text-sm font-medium">
+              <label htmlFor="description" className="text-sm font-medium">
                 Description
               </label>
               <Textarea
-                id="edit-description"
+                id="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
                 placeholder="Bucket description"
                 required
+                className="min-h-[150px] max-h-[300px] resize-none overflow-y-auto"
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="edit-status" className="text-sm font-medium">
+              <label htmlFor="status" className="text-sm font-medium">
                 Status
               </label>
               <Select
                 value={formData.status}
-                onValueChange={(value: "OPEN" | "CLOSED") =>
-                  setFormData({ ...formData, status: value })
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    status: value as "OPEN" | "CLOSED",
+                  })
                 }
               >
-                <SelectTrigger id="edit-status">
-                  <SelectValue placeholder="Select a status" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="OPEN">Open</SelectItem>
@@ -163,7 +168,8 @@ export default function EditBucketDialog({
               </Select>
             </div>
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="flex-shrink-0 pt-2">
             <Button
               type="button"
               variant="outline"

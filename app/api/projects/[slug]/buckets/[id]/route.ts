@@ -4,11 +4,15 @@ import { withAuth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
-// GET - Fetch a single bucket
+// GET - Fetch a single bucket with all related data
 export const GET = withAuth(async (request: NextRequest, user, { id }) => {
   try {
     const bucket = await prisma.bucket.findUnique({
       where: { id },
+      include: {
+        budgetItems: true,
+        pledges: true,
+      },
     });
 
     if (!bucket) {
