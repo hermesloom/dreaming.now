@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma";
+import { withAuth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -11,22 +12,31 @@ function validateSlug(slug: string): boolean {
 }
 
 // GET - Get a single project by slug
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export const GET = withAuth(async (request: NextRequest, user, { slug }) => {
   try {
-    const { slug } = await params;
-
     const project = await prisma.project.findUnique({
       where: { slug },
+      include: {
+        buckets: {
+          orderBy: { createdAt: "desc" },
+        },
+        userFunds: {
+          where: { userId: user.id },
+        },
+      },
     });
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    return NextResponse.json(project);
+    // Calculate total funds left for the user in this project
+    const userFunds = project.userFunds[0]?.fundsLeft || 0;
+
+    return NextResponse.json({
+      ...project,
+      userFunds: userFunds,
+    });
   } catch (error) {
     console.error("Error fetching project:", error);
     return NextResponse.json(
@@ -34,15 +44,11 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});
 
 // PUT - Update a project
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export const PUT = withAuth(async (request: NextRequest, user, { slug }) => {
   try {
-    const { slug } = await params;
     const { name, description, newSlug } = await request.json();
 
     if (!name && !description && !newSlug) {
@@ -103,16 +109,11 @@ export async function PUT(
       { status: 500 }
     );
   }
-}
+});
 
 // DELETE - Delete a project
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export const DELETE = withAuth(async (request: NextRequest, user, { slug }) => {
   try {
-    const { slug } = await params;
-
     const existingProject = await prisma.project.findUnique({
       where: { slug },
     });
@@ -133,4 +134,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
+});

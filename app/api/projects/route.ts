@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma";
+import { withAuth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -10,12 +11,29 @@ function validateSlug(slug: string): boolean {
   return slugRegex.test(slug);
 }
 
-// GET - List all projects
-export async function GET() {
+// GET - List all projects where the user has funds
+export const GET = withAuth(async (request: NextRequest, user) => {
   try {
-    const projects = await prisma.project.findMany({
-      orderBy: { createdAt: "desc" },
+    // Get all UserProjectFunds for the current user with their related projects
+    const userProjectFunds = await prisma.userProjectFunds.findMany({
+      where: { userId: user.id },
+      include: {
+        project: true,
+      },
+      orderBy: {
+        project: {
+          createdAt: "desc",
+        },
+      },
     });
+
+    // Transform the data to return projects with their funds information
+    const projects = userProjectFunds.map((fund) => ({
+      ...fund.project,
+      fundsLeft: fund.fundsLeft,
+      currency: fund.currency,
+    }));
+
     return NextResponse.json(projects);
   } catch (error) {
     console.error("Error fetching projects:", error);
@@ -24,10 +42,10 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});
 
 // POST - Create a new project
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, user) => {
   try {
     const { name, description, slug } = await request.json();
 
@@ -77,4 +95,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

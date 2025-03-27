@@ -39,6 +39,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { fetchAuth } from "@/lib/fetch";
+import CreateProjectDialog from "./CreateProjectDialog";
+import DeleteProjectDialog from "./DeleteProjectDialog";
 
 interface Project {
   id: string;
@@ -46,15 +49,15 @@ interface Project {
   description: string;
   slug: string;
   createdAt: string;
-  amount?: number;
+  fundsLeft: number;
+  currency: string;
 }
 
-export default function MainContent() {
+export default function ProjectList() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
@@ -69,19 +72,13 @@ export default function MainContent() {
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/projects");
+      const response = await fetchAuth("/api/projects");
       if (!response.ok) {
         throw new Error("Failed to fetch projects");
       }
       const data = await response.json();
 
-      // Add a simulated amount for each project for demonstration purposes
-      const enhancedData = data.map((project: Project) => ({
-        ...project,
-        amount: Math.floor(Math.random() * 10000) / 100, // Random amount between 0 and 100
-      }));
-
-      setProjects(enhancedData);
+      setProjects(data);
     } catch (error) {
       console.error("Error fetching projects:", error);
       toast.error("Failed to load projects");
@@ -101,44 +98,6 @@ export default function MainContent() {
       project.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Create project
-  const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          response.status < 500
-            ? (await response.json()).error
-            : "Unknown error"
-        );
-      }
-
-      const newProject = await response.json();
-      setProjects([newProject, ...projects]);
-      setFormData({ name: "", description: "", slug: "" });
-      setCreateDialogOpen(false);
-      toast.success("Project created successfully");
-    } catch (error) {
-      console.error("Error creating project:", error);
-      toast.error(
-        "Failed to create project" +
-          (error instanceof Error ? ": " + error.message : "")
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   // Update project
   const handleEditProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,7 +106,7 @@ export default function MainContent() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/projects/${currentProject.slug}`, {
+      const response = await fetchAuth(`/api/projects/${currentProject.slug}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -196,31 +155,10 @@ export default function MainContent() {
     }
   };
 
-  // Delete project
-  const handleDeleteProject = async () => {
-    if (!currentProject) return;
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch(`/api/projects/${currentProject.slug}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete project");
-      }
-
-      setProjects(projects.filter((p) => p.id !== currentProject.id));
-      setCurrentProject(null);
-      setDeleteDialogOpen(false);
-      toast.success("Project deleted successfully");
-    } catch (error) {
-      console.error("Error deleting project:", error);
-      toast.error("Failed to delete project");
-    } finally {
-      setIsSubmitting(false);
-    }
+  // Handle project delete completion
+  const handleProjectDeleted = (projectId: string) => {
+    setProjects(projects.filter((p) => p.id !== projectId));
+    setCurrentProject(null);
   };
 
   const handleEdit = (project: Project, e: React.MouseEvent) => {
@@ -251,127 +189,39 @@ export default function MainContent() {
   };
 
   // Format currency
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, currency: string = "EUR") => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "EUR",
+      currency: currency,
       minimumFractionDigits: 2,
     }).format(amount);
+  };
+
+  // Handler for when a new project is created by the dialog component
+  const handleProjectCreated = (newProject: Project) => {
+    setProjects([newProject, ...projects]);
   };
 
   return (
     <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold">Projects</h1>
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search projects..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 w-full"
-            />
+
+        {/* Only show search and new project button when projects exist */}
+        {projects.length > 0 && (
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 w-full"
+              />
+            </div>
+            <CreateProjectDialog onProjectCreated={handleProjectCreated} />
           </div>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 whitespace-nowrap">
-                <PlusCircle size={16} />
-                New Project
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Project</DialogTitle>
-                <DialogDescription>
-                  Add a new project to your collection.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreateProject}>
-                <div className="space-y-4 my-4">
-                  <div className="space-y-2">
-                    <label htmlFor="name" className="text-sm font-medium">
-                      Name
-                    </label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      placeholder="Project name"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="description"
-                      className="text-sm font-medium"
-                    >
-                      Description
-                    </label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                      placeholder="Project description"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="slug" className="text-sm font-medium">
-                      Slug
-                    </label>
-                    <div className="space-y-1">
-                      <Input
-                        id="slug"
-                        value={formData.slug}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            slug: e.target.value
-                              .toLowerCase()
-                              .replace(/[^a-z0-9-]/g, ""),
-                          })
-                        }
-                        placeholder="project-slug"
-                        required
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        URL-friendly identifier. Use lowercase letters, numbers,
-                        and hyphens only.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setCreateDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating...
-                      </>
-                    ) : (
-                      "Create"
-                    )}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+        )}
       </div>
 
       {isLoading ? (
@@ -388,10 +238,10 @@ export default function MainContent() {
               ? "Try a different search term"
               : "Create your first project to get started."}
           </p>
-          {!searchQuery && (
-            <Button onClick={() => setCreateDialogOpen(true)}>
-              Create Project
-            </Button>
+          {!searchQuery && projects.length === 0 && (
+            <div className="flex justify-center">
+              <CreateProjectDialog onProjectCreated={handleProjectCreated} />
+            </div>
           )}
         </div>
       ) : (
@@ -417,13 +267,16 @@ export default function MainContent() {
                   <div className="w-full md:w-2/3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="font-medium">
-                        {formatCurrency(project.amount || 0)}
+                        {formatCurrency(project.fundsLeft, project.currency)}
                       </div>
                       <Button
                         variant="default"
                         size="sm"
                         className="inline-flex items-center gap-1"
-                        onClick={(e) => handleDistribute(project, e)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateToProject(project.slug);
+                        }}
                       >
                         Distribute
                         <ArrowRight size={14} />
@@ -558,37 +411,13 @@ export default function MainContent() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the project "{currentProject?.name}".
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteProject}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete Confirmation Dialog - updated onOpenChange handler */}
+      <DeleteProjectDialog
+        project={currentProject}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onProjectDeleted={handleProjectDeleted}
+      />
     </main>
   );
 }

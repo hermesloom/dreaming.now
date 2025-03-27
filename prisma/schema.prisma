@@ -15,6 +15,8 @@ model User {
   id String @id @map("_id") @db.ObjectId
   sessions Session[]  @relation("UserSessions")
   isAdmin Boolean @default(false)
+  projectFunds UserProjectFunds[]
+  pledges Pledge[]
 }
 
 model Session {
@@ -31,6 +33,72 @@ model Project {
   name String
   description String
   slug String @unique
+  webhookSecret String @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  buckets Bucket[]
+  userFunds UserProjectFunds[]
+}
+
+enum BucketStatus {
+  OPEN
+  CLOSED
+}
+
+model Bucket {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  description String
+  status BucketStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String @db.ObjectId
+  budgetItems BudgetItem[]
+  pledges Pledge[]
+}
+
+model BudgetItem {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  description String
+  amount Float
+  currency String @default("EUR")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bucket Bucket @relation(fields: [bucketId], references: [id], onDelete: Cascade)
+  bucketId String @db.ObjectId
+}
+
+model UserProjectFunds {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
+  
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String @db.ObjectId
+  
+  fundsLeft Float
+  currency String @default("EUR")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, projectId])
+}
+
+model Pledge {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
+  
+  bucket Bucket @relation(fields: [bucketId], references: [id], onDelete: Cascade)
+  bucketId String @db.ObjectId
+  
+  amount Float
+  currency String @default("EUR")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

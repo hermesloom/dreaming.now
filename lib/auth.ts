@@ -13,11 +13,16 @@ export interface AuthRequest {
 }
 
 // Higher-order function to protect API routes with authentication
-export function withAuth(
-  handler: (req: NextRequest, user: User) => Promise<NextResponse>
+export function withAuth<Params extends Record<string, string>>(
+  handler: (
+    req: NextRequest,
+    user: User,
+    params: Params
+  ) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest) => {
+  return async (req: NextRequest, { params }: { params: Promise<Params> }) => {
     const prisma = new PrismaClient();
+    const actualParams = await params;
 
     try {
       // Get the Authorization header
@@ -51,7 +56,7 @@ export function withAuth(
       }
 
       // Pass the user data to the handler
-      return handler(req, session.user);
+      return handler(req, session.user, actualParams);
     } catch (error) {
       console.error("Authentication error:", error);
       return NextResponse.json(
