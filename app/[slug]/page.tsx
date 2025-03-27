@@ -14,24 +14,11 @@ import CreateBucketDialog from "@/components/buckets/CreateBucketDialog";
 import EditBucketDialog from "@/components/buckets/EditBucketDialog";
 import DeleteBucketDialog from "@/components/buckets/DeleteBucketDialog";
 import AddBucketButton from "@/components/buckets/AddBucketButton";
-
-interface Bucket {
-  id: string;
-  title: string;
-  description: string;
-  status: "OPEN" | "CLOSED";
-  createdAt: string;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  slug: string;
-  createdAt: string;
-  buckets: Bucket[];
-  userFunds: number;
-}
+import ReactMarkdown from "react-markdown";
+import { Project, Bucket } from "@/lib/types";
+import BucketsHeader from "@/components/buckets/BucketsHeader";
+import Link from "next/link";
+import { Home, ChevronRight } from "lucide-react";
 
 export default function ProjectDetail() {
   const params = useParams();
@@ -92,9 +79,10 @@ export default function ProjectDetail() {
     setCurrentBucket(null);
   };
 
-  const handleDeleteBucket = (bucketId: string) => {
-    setBuckets(buckets.filter((b) => b.id !== bucketId));
+  const handleBucketDeleted = (bucketId: string) => {
     setCurrentBucket(null);
+    setBuckets(buckets.filter((b) => b.id !== bucketId));
+    setDeleteDialogOpen(true);
   };
 
   // Handle dialog actions
@@ -103,7 +91,7 @@ export default function ProjectDetail() {
     setEditDialogOpen(true);
   };
 
-  const handleDeleteBucketAction = (bucket: Bucket) => {
+  const handleDeleteBucket = (bucket: Bucket) => {
     setCurrentBucket(bucket);
     setDeleteDialogOpen(true);
   };
@@ -128,8 +116,34 @@ export default function ProjectDetail() {
           </div>
         ) : project ? (
           <>
-            <ProjectHeader
-              projectName={project.name}
+            {/* Breadcrumbs */}
+            <nav className="flex mb-4 items-center text-sm text-muted-foreground">
+              <Link
+                href="/"
+                className="flex items-center hover:text-foreground"
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Projects
+              </Link>
+              <ChevronRight className="mx-2 h-4 w-4" />
+              <span className="text-foreground font-medium">
+                {project.name}
+              </span>
+            </nav>
+
+            <ProjectHeader projectName={project.name} />
+
+            {project.description && (
+              <div className="mb-6 prose max-w-none">
+                <div className="border rounded-md p-4 bg-card mb-4">
+                  <div className="prose min-w-full">
+                    <ReactMarkdown>{project.description}</ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <BucketsHeader
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               onCreateClick={() => setCreateDialogOpen(true)}
@@ -137,7 +151,7 @@ export default function ProjectDetail() {
             />
 
             <ProjectFunds
-              amount={project.userFunds || 0}
+              amount={project.fundsLeft || 0}
               onReload={handleReload}
               isReloading={isReloading}
               isLoading={isLoading}
@@ -165,20 +179,16 @@ export default function ProjectDetail() {
               </div>
             ) : (
               <div className="border rounded-lg overflow-hidden divide-y">
-                {filteredBuckets.map(
-                  (bucket) =>
-                    bucket.status === "OPEN" && (
-                      <BucketItem
-                        key={bucket.id}
-                        bucket={bucket}
-                        projectSlug={project.slug}
-                        onEdit={() => handleEditBucket(bucket)}
-                        onDelete={() => handleDeleteBucket(bucket.id)}
-                        userFunds={project.userFunds}
-                        onFundsAssigned={fetchProject}
-                      />
-                    )
-                )}
+                {filteredBuckets.map((bucket) => (
+                  <BucketItem
+                    key={bucket.id}
+                    bucket={bucket}
+                    projectSlug={project.slug}
+                    onEdit={() => handleEditBucket(bucket)}
+                    onDelete={() => handleDeleteBucket(bucket)}
+                    onFundsAssigned={fetchProject}
+                  />
+                ))}
               </div>
             )}
 
@@ -203,7 +213,7 @@ export default function ProjectDetail() {
               bucket={currentBucket}
               open={deleteDialogOpen}
               onOpenChange={setDeleteDialogOpen}
-              onBucketDeleted={handleDeleteBucket}
+              onBucketDeleted={handleBucketDeleted}
             />
           </>
         ) : (

@@ -7,7 +7,6 @@ import {
   Home,
   ChevronRight,
   Loader2,
-  BadgeEuro,
   PlusCircle,
   Pencil,
   Trash2,
@@ -16,53 +15,15 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { fetchAuth } from "@/lib/fetch";
-import { Progress } from "@/components/ui/progress";
 import ReactMarkdown from "react-markdown";
 import BucketProgressBar from "@/components/buckets/BucketProgressBar";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import AssignFundsButton from "@/components/buckets/AssignFundsButton";
 import AddBudgetItemDialog from "@/components/buckets/AddBudgetItemDialog";
 import EditBudgetItemDialog from "@/components/buckets/EditBudgetItemDialog";
 import DeleteBudgetItemDialog from "@/components/buckets/DeleteBudgetItemDialog";
-
-interface BudgetItem {
-  id: string;
-  description: string;
-  amount: number;
-  currency: string;
-  createdAt: string;
-}
-
-interface Pledge {
-  id: string;
-  amount: number;
-  currency: string;
-  createdAt: string;
-}
-
-interface Bucket {
-  id: string;
-  title: string;
-  description: string;
-  status: "OPEN" | "CLOSED";
-  createdAt: string;
-  budgetItems: BudgetItem[];
-  pledges: Pledge[];
-  projectId: string;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  slug: string;
-  userFunds: number;
-}
+import BucketStatusBadges from "@/components/buckets/BucketStatusBadges";
+import { BudgetItem, Bucket, Project } from "@/lib/types";
 
 export default function BucketDetail() {
   const params = useParams();
@@ -86,12 +47,6 @@ export default function BucketDetail() {
 
   const totalPledged =
     bucket?.pledges.reduce((sum, pledge) => sum + pledge.amount, 0) || 0;
-
-  // Calculate progress percentage (capped at 100%)
-  const progressPercentage =
-    totalBudget > 0
-      ? Math.min(Math.round((totalPledged / totalBudget) * 100), 100)
-      : 0;
 
   // Format currency
   const formatCurrency = (amount: number, currency: string = "EUR") => {
@@ -215,17 +170,7 @@ export default function BucketDetail() {
             {/* Bucket Header */}
             <div className="mb-8">
               <h1 className="text-2xl font-bold mb-2">{bucket.title}</h1>
-              <div className="flex items-center gap-2 mb-6">
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    bucket.status === "OPEN"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {bucket.status}
-                </span>
-              </div>
+              <BucketStatusBadges bucket={bucket} className="mb-6" />
 
               {/* Progress Bar */}
               <div className="mb-6">
@@ -242,7 +187,7 @@ export default function BucketDetail() {
                   bucketId={bucketId}
                   bucketTitle={bucket?.title || ""}
                   status={bucket?.status || "CLOSED"}
-                  userFunds={project?.userFunds || 0}
+                  fundsLeft={project?.fundsLeft || 0}
                   onFundsAssigned={fetchBucketDetails}
                 />
               </div>

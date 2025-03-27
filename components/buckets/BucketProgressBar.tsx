@@ -1,6 +1,7 @@
 "use client";
 
 import { Progress } from "@/components/ui/progress";
+import { calculateProgressPercentage } from "@/lib/utils";
 
 interface BucketProgressBarProps {
   totalBudget: number;
@@ -18,10 +19,10 @@ export default function BucketProgressBar({
   currency = "EUR",
 }: BucketProgressBarProps) {
   // Calculate progress percentage (capped at 100%)
-  const progressPercentage =
-    totalBudget > 0
-      ? Math.min(Math.round((totalPledged / totalBudget) * 100), 100)
-      : 0;
+  const progressPercentage = calculateProgressPercentage(
+    totalBudget,
+    totalPledged
+  );
 
   // Format currency
   const formatCurrency = (amount: number) => {

@@ -1,9 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, BadgeEuro } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,30 +11,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import AssignFundsButton from "@/components/buckets/AssignFundsButton";
-
-interface Bucket {
-  id: string;
-  title: string;
-  description: string;
-  status: "OPEN" | "CLOSED";
-  createdAt: string;
-  budgetItems?: {
-    id: string;
-    amount: number;
-  }[];
-  pledges?: {
-    id: string;
-    amount: number;
-  }[];
-}
+import BucketStatusBadges from "@/components/buckets/BucketStatusBadges";
+import { calculateBucketProgress } from "@/lib/utils";
+import { Bucket } from "@/lib/types";
 
 interface BucketItemProps {
   bucket: Bucket;
   projectSlug: string;
   onEdit: (bucket: Bucket) => void;
   onDelete: (bucket: Bucket) => void;
-  userFunds: number;
   onFundsAssigned?: () => void;
 }
 
@@ -44,8 +28,6 @@ export default function BucketItem({
   projectSlug,
   onEdit,
   onDelete,
-  userFunds,
-  onFundsAssigned,
 }: BucketItemProps) {
   const router = useRouter();
 
@@ -64,21 +46,6 @@ export default function BucketItem({
     router.push(`/${projectSlug}/${bucket.id}`);
   };
 
-  const getStatusBadge = (status: string) => {
-    if (status === "OPEN") {
-      return <Badge className="bg-green-500">Open</Badge>;
-    }
-    return <Badge variant="secondary">Closed</Badge>;
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   // Calculate totals for the progress bar
   const totalBudget =
     bucket.budgetItems?.reduce((sum, item) => sum + item.amount, 0) || 0;
@@ -87,10 +54,7 @@ export default function BucketItem({
     bucket.pledges?.reduce((sum, pledge) => sum + pledge.amount, 0) || 0;
 
   // Add the progressPercentage calculation
-  const progressPercentage =
-    totalBudget > 0
-      ? Math.min(Math.round((totalPledged / totalBudget) * 100), 100)
-      : 0;
+  const progressPercentage = calculateBucketProgress(bucket);
 
   // Format currency function
   const formatCurrency = (amount: number, currency: string = "EUR") => {
@@ -118,10 +82,7 @@ export default function BucketItem({
               </Link>
             </h3>
             <div className="flex items-center gap-2">
-              {getStatusBadge(bucket.status)}
-              <span className="text-xs text-muted-foreground">
-                Created on {formatDate(bucket.createdAt)}
-              </span>
+              <BucketStatusBadges bucket={bucket} />
             </div>
           </div>
           <p className="text-sm text-muted-foreground line-clamp-2">

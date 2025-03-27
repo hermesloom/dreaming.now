@@ -14,14 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  slug: string;
-  createdAt: string;
-}
+import { Project } from "@/lib/types";
 
 interface DeleteProjectDialogProps {
   project: Project | null;

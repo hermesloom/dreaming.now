@@ -16,9 +16,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Project } from "@/lib/types";
 
 interface CreateProjectDialogProps {
-  onProjectCreated: (newProject: any) => void;
+  onProjectCreated: (newProject: Project) => void;
 }
 
 export default function CreateProjectDialog({

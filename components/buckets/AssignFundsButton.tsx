@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { BadgeEuro } from "lucide-react";
+import { useState, useEffect } from "react";
+import { BadgeEuro, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -10,13 +10,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import AssignFundsDialog from "@/components/buckets/AssignFundsDialog";
+import { fetchAuth } from "@/lib/fetch";
 
 interface AssignFundsButtonProps {
   projectSlug: string;
   bucketId: string;
   bucketTitle: string;
   status: "OPEN" | "CLOSED";
-  userFunds: number;
+  fundsLeft: number;
   onFundsAssigned?: () => void;
   size?: "default" | "sm"; // Allow different sizes
   className?: string;
@@ -28,19 +29,55 @@ export default function AssignFundsButton({
   bucketId,
   bucketTitle,
   status,
-  userFunds,
+  fundsLeft,
   onFundsAssigned,
   size = "default",
   className = "",
   stopPropagation = true, // Set default to true
 }: AssignFundsButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [currentPledge, setCurrentPledge] = useState<{ amount: number } | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch the user's current pledge for this bucket
+  useEffect(() => {
+    const fetchPledge = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetchAuth(
+          `/api/projects/${projectSlug}/buckets/${bucketId}/pledge`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentPledge(data.amount > 0 ? data : null);
+        }
+      } catch (error) {
+        console.error("Error fetching pledge:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPledge();
+  }, [projectSlug, bucketId]);
 
   const handleClick = (e: React.MouseEvent) => {
     if (stopPropagation) {
       e.stopPropagation();
     }
     setDialogOpen(true);
+  };
+
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 2,
+    }).format(amount);
   };
 
   // Adjust styles based on size
@@ -61,6 +98,19 @@ export default function AssignFundsButton({
     }
   };
 
+  if (isLoading) {
+    return (
+      <Button
+        size={size}
+        variant="outline"
+        className={`${buttonStyles[size]} ${className}`}
+        disabled
+      >
+        Loading...
+      </Button>
+    );
+  }
+
   return (
     <>
       <TooltipProvider>
@@ -69,13 +119,24 @@ export default function AssignFundsButton({
             <div onClick={handleWrapperClick}>
               <Button
                 size={size}
-                variant="outline"
+                variant={currentPledge ? "default" : "outline"}
                 className={`${buttonStyles[size]} ${className}`}
                 onClick={handleClick}
-                disabled={status !== "OPEN" || userFunds <= 0}
+                disabled={
+                  status !== "OPEN" || (fundsLeft <= 0 && !currentPledge)
+                }
               >
-                <BadgeEuro className={iconStyles[size]} />
-                Assign Funds
+                {currentPledge ? (
+                  <>
+                    <Edit className={iconStyles[size]} />
+                    Assigned {formatCurrency(currentPledge.amount)}
+                  </>
+                ) : (
+                  <>
+                    <BadgeEuro className={iconStyles[size]} />
+                    Assign Funds
+                  </>
+                )}
               </Button>
             </div>
           </TooltipTrigger>
@@ -83,7 +144,7 @@ export default function AssignFundsButton({
             <TooltipContent onClick={handleWrapperClick}>
               <p>This bucket is closed and not accepting funds</p>
             </TooltipContent>
-          ) : userFunds <= 0 ? (
+          ) : fundsLeft <= 0 && !currentPledge ? (
             <TooltipContent onClick={handleWrapperClick}>
               <p>You don't have any funds available in this project</p>
             </TooltipContent>
@@ -95,7 +156,8 @@ export default function AssignFundsButton({
         projectSlug={projectSlug}
         bucketId={bucketId}
         bucketTitle={bucketTitle}
-        availableFunds={userFunds}
+        fundsLeft={fundsLeft}
+        currentPledgeAmount={currentPledge?.amount || 0}
         currency="EUR"
         open={dialogOpen}
         onOpenChange={setDialogOpen}

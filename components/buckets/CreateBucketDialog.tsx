@@ -15,14 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { fetchAuth } from "@/lib/fetch";
-
-interface Bucket {
-  id: string;
-  title: string;
-  description: string;
-  status: "OPEN" | "CLOSED";
-  createdAt: string;
-}
+import { Bucket } from "@/lib/types";
 
 interface CreateBucketDialogProps {
   projectSlug: string;

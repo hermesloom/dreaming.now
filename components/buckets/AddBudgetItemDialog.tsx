@@ -14,14 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { fetchAuth } from "@/lib/fetch";
-
-interface BudgetItem {
-  id: string;
-  description: string;
-  amount: number;
-  currency: string;
-  createdAt: string;
-}
+import { BudgetItem } from "@/lib/types";
 
 interface AddBudgetItemDialogProps {
   projectSlug: string;

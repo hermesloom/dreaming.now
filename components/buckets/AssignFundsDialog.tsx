@@ -19,7 +19,8 @@ interface AssignFundsDialogProps {
   projectSlug: string;
   bucketId: string;
   bucketTitle: string;
-  availableFunds: number;
+  fundsLeft: number;
+  currentPledgeAmount?: number;
   currency: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,14 +31,44 @@ export default function AssignFundsDialog({
   projectSlug,
   bucketId,
   bucketTitle,
-  availableFunds,
+  fundsLeft,
+  currentPledgeAmount = 0,
   currency,
   open,
   onOpenChange,
   onSuccess,
 }: AssignFundsDialogProps) {
-  const [amount, setAmount] = useState<number | "">(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [amount, setAmount] = useState<number | "">(currentPledgeAmount);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingPledge, setIsFetchingPledge] = useState(false);
+
+  // Fetch current pledge when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchCurrentPledge();
+    }
+  }, [open, bucketId]);
+
+  const fetchCurrentPledge = async () => {
+    setIsFetchingPledge(true);
+    try {
+      const response = await fetchAuth(
+        `/api/projects/${projectSlug}/buckets/${bucketId}/pledge`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch current pledge");
+      }
+
+      const data = await response.json();
+      setAmount(data.amount || 0);
+    } catch (error) {
+      console.error("Error fetching pledge:", error);
+      // Don't show error toast as this is not a critical failure
+    } finally {
+      setIsFetchingPledge(false);
+    }
+  };
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -48,20 +79,23 @@ export default function AssignFundsDialog({
     }).format(value);
   };
 
+  // Calculate total available funds including current pledge
+  const totalAvailable = fundsLeft + currentPledgeAmount;
+
   const handleAssignFunds = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (amount === "" || amount <= 0) {
+    if (amount === "" || amount < 0) {
       toast.error("Please enter a valid amount");
       return;
     }
 
-    if (amount > availableFunds) {
+    if (amount > totalAvailable) {
       toast.error("Amount exceeds your available funds");
       return;
     }
 
-    setIsSubmitting(true);
+    setIsLoading(true);
 
     try {
       const response = await fetchAuth(
@@ -90,11 +124,11 @@ export default function AssignFundsDialog({
         error instanceof Error ? error.message : "Failed to assign funds"
       );
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  // Add this function to block all click events from propagating
+  // Block propagation for dialog clicks
   const blockPropagation = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
@@ -103,65 +137,90 @@ export default function AssignFundsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]" onClick={blockPropagation}>
         <DialogHeader>
-          <DialogTitle>Assign Funds</DialogTitle>
+          <DialogTitle>
+            {currentPledgeAmount > 0 ? "Update Funds" : "Assign Funds"}
+          </DialogTitle>
           <DialogDescription>
-            Assign your available funds to "{bucketTitle}"
+            {currentPledgeAmount > 0
+              ? `Adjust your assigned funds for "${bucketTitle}"`
+              : `Assign your available funds to "${bucketTitle}"`}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleAssignFunds}>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <label htmlFor="amount" className="text-sm font-medium">
-                  Amount
-                </label>
-                <span className="text-sm text-muted-foreground">
-                  Available: {formatCurrency(availableFunds)}
-                </span>
-              </div>
-              <div className="relative">
-                <Input
-                  id="amount"
-                  type="number"
-                  value={amount === "" ? "" : amount}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setAmount(val === "" ? "" : parseFloat(val));
-                  }}
-                  step="0.01"
-                  min="0.01"
-                  max={availableFunds}
-                  placeholder="0.00"
-                  className="pl-8"
-                  required
-                />
-                <BadgeEuro className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        {isFetchingPledge ? (
+          <div className="py-4 flex justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <form onSubmit={handleAssignFunds}>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <label htmlFor="amount" className="text-sm font-medium">
+                    Amount
+                  </label>
+                  <span className="text-sm text-muted-foreground">
+                    Available: {formatCurrency(totalAvailable)}
+                  </span>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="amount"
+                    type="number"
+                    value={amount === "" ? "" : amount}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setAmount(val === "" ? "" : parseFloat(val));
+                    }}
+                    step="0.01"
+                    min="0"
+                    max={totalAvailable}
+                    placeholder="0.00"
+                    className="pl-8"
+                    required
+                  />
+                  <BadgeEuro className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </div>
               </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || amount <= 0 || amount > availableFunds}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Assigning...
-                </>
-              ) : (
-                "Assign Funds"
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={
+                  isLoading ||
+                  (typeof amount === "number" &&
+                    (amount < 0 || amount > totalAvailable)) ||
+                  amount === ""
+                }
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {currentPledgeAmount > 0
+                      ? amount === 0
+                        ? "Removing..."
+                        : "Updating..."
+                      : "Assigning..."}
+                  </>
+                ) : currentPledgeAmount > 0 ? (
+                  amount === 0 ? (
+                    "Remove Funds"
+                  ) : (
+                    "Update Funds"
+                  )
+                ) : (
+                  "Assign Funds"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

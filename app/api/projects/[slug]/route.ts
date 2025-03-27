@@ -45,11 +45,11 @@ export const GET = withAuth(async (request: NextRequest, user, { slug }) => {
     }
 
     // Calculate total funds left for the user in this project
-    const userFunds = project.userFunds[0]?.fundsLeft || 0;
+    const fundsLeft = project.userFunds[0]?.fundsLeft || 0;
 
     return NextResponse.json({
       ...project,
-      userFunds: userFunds,
+      fundsLeft,
     });
   } catch (error) {
     console.error("Error fetching project:", error);
@@ -113,9 +113,22 @@ export const PUT = withAuth(async (request: NextRequest, user, { slug }) => {
         description: description || existingProject.description,
         ...(newSlug && newSlug !== slug ? { slug: newSlug } : {}),
       },
+      include: {
+        buckets: true,
+      },
     });
 
-    return NextResponse.json(updatedProject);
+    const projectWithFunds = await prisma.userProjectFunds.findFirst({
+      where: {
+        projectId: updatedProject.id,
+        userId: user.id,
+      },
+    });
+
+    return NextResponse.json({
+      ...updatedProject,
+      fundsLeft: projectWithFunds?.fundsLeft || 0,
+    });
   } catch (error) {
     console.error("Error updating project:", error);
     return NextResponse.json(

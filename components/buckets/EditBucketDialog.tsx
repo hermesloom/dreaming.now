@@ -22,14 +22,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { fetchAuth } from "@/lib/fetch";
-
-interface Bucket {
-  id: string;
-  title: string;
-  description: string;
-  status: "OPEN" | "CLOSED";
-  createdAt: string;
-}
+import { Bucket } from "@/lib/types";
 
 interface EditBucketDialogProps {
   projectSlug: string;

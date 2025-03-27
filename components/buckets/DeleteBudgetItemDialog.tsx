@@ -14,12 +14,7 @@ import { fetchAuth } from "@/lib/fetch";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-
-interface BudgetItem {
-  id: string;
-  description: string;
-  amount: number;
-}
+import { BudgetItem } from "@/lib/types";
 
 interface DeleteBudgetItemDialogProps {
   projectSlug: string;
