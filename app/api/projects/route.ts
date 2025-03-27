@@ -100,7 +100,7 @@ export const POST = withAuth(async (request: NextRequest, user) => {
         },
       });
 
-      return project;
+      return { ...project, fundsLeft: 0, currency: "EUR", isAdmin: true };
     });
 
     return NextResponse.json(result, { status: 201 });
