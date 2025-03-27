@@ -57,7 +57,7 @@ export default function AuthCode() {
   }, [code, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center">
       {loading && (
         <>
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
