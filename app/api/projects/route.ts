@@ -79,15 +79,32 @@ export const POST = withAuth(async (request: NextRequest, user) => {
       );
     }
 
-    const project = await prisma.project.create({
-      data: {
-        name,
-        description,
-        slug,
-      },
+    // Create the project and the admin UserProjectFunds in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create project
+      const project = await tx.project.create({
+        data: {
+          name,
+          description,
+          slug,
+        },
+      });
+
+      // Create UserProjectFunds with admin rights for the creator
+      await tx.userProjectFunds.create({
+        data: {
+          user: { connect: { id: user.id } },
+          project: { connect: { id: project.id } },
+          fundsLeft: 0,
+          currency: "EUR",
+          isAdmin: true,
+        },
+      });
+
+      return project;
     });
 
-    return NextResponse.json(project, { status: 201 });
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error("Error creating project:", error);
     return NextResponse.json(

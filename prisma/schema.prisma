@@ -80,6 +80,7 @@ model UserProjectFunds {
   
   fundsLeft Float
   currency String @default("EUR")
+  isAdmin Boolean @default(false)
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
