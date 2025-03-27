@@ -14,18 +14,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  if (profileLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-lg">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile) {
+  if (!profile && !profileLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
         <div className="max-w-md space-y-6">
