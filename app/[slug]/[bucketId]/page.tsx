@@ -135,153 +135,144 @@ export default function BucketDetail() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          </div>
-        ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-destructive">{error}</p>
-          </div>
-        ) : bucket && project ? (
-          <>
-            {/* Breadcrumbs */}
-            <nav className="flex mb-4 items-center text-sm text-muted-foreground">
-              <Link
-                href="/"
-                className="flex items-center hover:text-foreground"
-              >
-                <Home className="mr-2 h-4 w-4" />
-                Projects
-              </Link>
-              <ChevronRight className="mx-2 h-4 w-4" />
-              <Link href={`/${projectSlug}`} className="hover:text-foreground">
-                {project.name}
-              </Link>
-              <ChevronRight className="mx-2 h-4 w-4" />
-              <span className="text-foreground font-medium">
-                {bucket.title}
-              </span>
-            </nav>
+    <>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <p className="text-destructive">{error}</p>
+        </div>
+      ) : bucket && project ? (
+        <>
+          {/* Breadcrumbs */}
+          <nav className="flex mb-4 items-center text-sm text-muted-foreground">
+            <Link href="/" className="flex items-center hover:text-foreground">
+              <Home className="mr-2 h-4 w-4" />
+              Projects
+            </Link>
+            <ChevronRight className="mx-2 h-4 w-4" />
+            <Link href={`/${projectSlug}`} className="hover:text-foreground">
+              {project.name}
+            </Link>
+            <ChevronRight className="mx-2 h-4 w-4" />
+            <span className="text-foreground font-medium">{bucket.title}</span>
+          </nav>
 
-            {/* Bucket Header */}
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold mb-2">{bucket.title}</h1>
-              <BucketStatusBadges bucket={bucket} className="mb-6" />
+          {/* Bucket Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold mb-2">{bucket.title}</h1>
+            <BucketStatusBadges bucket={bucket} className="mb-6" />
 
-              {/* Progress Bar */}
-              <div className="mb-6">
-                <BucketProgressBar
-                  totalBudget={totalBudget}
-                  totalPledged={totalPledged}
-                />
-              </div>
-
-              {/* Assign Funds Button */}
-              <div className="mt-4">
-                <AssignFundsButton
-                  projectSlug={projectSlug}
-                  bucketId={bucketId}
-                  bucketTitle={bucket?.title || ""}
-                  status={bucket?.status || "CLOSED"}
-                  fundsLeft={project?.fundsLeft || 0}
-                  onFundsAssigned={fetchBucketDetails}
-                />
-              </div>
+            {/* Progress Bar */}
+            <div className="mb-6">
+              <BucketProgressBar
+                totalBudget={totalBudget}
+                totalPledged={totalPledged}
+              />
             </div>
 
-            {/* Bucket Description */}
-            <div className="mb-8 prose max-w-none">
-              <h2 className="text-xl font-semibold mb-4">About this Bucket</h2>
-              <div className="border rounded-md p-4 bg-card">
-                <div className="prose min-w-full">
-                  <ReactMarkdown>{bucket.description}</ReactMarkdown>
+            {/* Assign Funds Button */}
+            <div className="mt-4">
+              <AssignFundsButton
+                projectSlug={projectSlug}
+                bucketId={bucketId}
+                bucketTitle={bucket?.title || ""}
+                status={bucket?.status || "CLOSED"}
+                fundsLeft={project?.fundsLeft || 0}
+                onFundsAssigned={fetchBucketDetails}
+              />
+            </div>
+          </div>
+
+          {/* Bucket Description */}
+          <div className="mb-8 prose max-w-none">
+            <h2 className="text-xl font-semibold mb-4">About this Bucket</h2>
+            <div className="border rounded-md p-4 bg-card">
+              <div className="prose min-w-full">
+                <ReactMarkdown>{bucket.description}</ReactMarkdown>
+              </div>
+            </div>
+          </div>
+
+          {/* Budget Items */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Budget Items</h2>
+              {project.isAdmin ? (
+                <Button
+                  size="sm"
+                  onClick={() => setAddBudgetItemOpen(true)}
+                  disabled={bucket.status !== "OPEN"}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              ) : null}
+            </div>
+
+            {bucket.budgetItems.length > 0 ? (
+              <div className="border rounded-md overflow-hidden">
+                <div className="bg-muted/50 p-3 hidden md:flex text-sm font-medium text-muted-foreground">
+                  <div className="flex-1">Description</div>
+                  <div className="w-32 text-right">Amount</div>
+                  {bucket.status === "OPEN" && project.isAdmin && (
+                    <div className="w-24"></div>
+                  )}
                 </div>
-              </div>
-            </div>
-
-            {/* Budget Items */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Budget Items</h2>
-                {project.isAdmin ? (
-                  <Button
-                    size="sm"
-                    onClick={() => setAddBudgetItemOpen(true)}
-                    disabled={bucket.status !== "OPEN"}
-                  >
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Add Item
-                  </Button>
-                ) : null}
-              </div>
-
-              {bucket.budgetItems.length > 0 ? (
-                <div className="border rounded-md overflow-hidden">
-                  <div className="bg-muted/50 p-3 hidden md:flex text-sm font-medium text-muted-foreground">
-                    <div className="flex-1">Description</div>
-                    <div className="w-32 text-right">Amount</div>
-                    {bucket.status === "OPEN" && project.isAdmin && (
-                      <div className="w-24"></div>
-                    )}
-                  </div>
-                  <div className="divide-y">
-                    {bucket.budgetItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-3 flex flex-col md:flex-row items-center"
-                      >
-                        <div className="flex-1 mb-2 md:mb-0 w-full md:w-auto">
-                          <div className="font-medium">{item.description}</div>
-                        </div>
-                        <div className="w-full md:w-32 text-left md:text-right font-medium mb-2 md:mb-0">
-                          {formatCurrency(item.amount, item.currency)}
-                        </div>
-                        {bucket.status === "OPEN" && project.isAdmin && (
-                          <div className="w-full md:w-24 flex justify-start space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditBudgetItem(item)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => handleDeleteBudgetItem(item)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
+                <div className="divide-y">
+                  {bucket.budgetItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-3 flex flex-col md:flex-row items-center"
+                    >
+                      <div className="flex-1 mb-2 md:mb-0 w-full md:w-auto">
+                        <div className="font-medium">{item.description}</div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="w-full md:w-32 text-left md:text-right font-medium mb-2 md:mb-0">
+                        {formatCurrency(item.amount, item.currency)}
+                      </div>
+                      {bucket.status === "OPEN" && project.isAdmin && (
+                        <div className="w-full md:w-24 flex justify-start space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditBudgetItem(item)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleDeleteBudgetItem(item)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="text-center py-12 border rounded-lg">
-                  <p className="text-muted-foreground">
-                    No budget items created yet
-                  </p>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium mb-2">Bucket not found</h3>
-            <p className="text-muted-foreground">
-              The bucket you're looking for doesn't exist.
-            </p>
+              </div>
+            ) : (
+              <div className="text-center py-12 border rounded-lg">
+                <p className="text-muted-foreground">
+                  No budget items created yet
+                </p>
+              </div>
+            )}
           </div>
-        )}
-      </main>
-      <Footer />
+        </>
+      ) : (
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium mb-2">Bucket not found</h3>
+          <p className="text-muted-foreground">
+            The bucket you're looking for doesn't exist.
+          </p>
+        </div>
+      )}
       <AddBudgetItemDialog
         projectSlug={projectSlug}
         bucketId={bucketId}
@@ -305,6 +296,6 @@ export default function BucketDetail() {
         onOpenChange={setDeleteBudgetItemOpen}
         onBudgetItemDeleted={handleDeleteBudgetItemSuccess}
       />
-    </div>
+    </>
   );
 }
