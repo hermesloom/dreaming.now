@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@/generated/prisma";
 import { withAuth, withProjectAdminAuth } from "@/lib/auth";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // GET - List all budget items for a bucket
 export const GET = withAuth(

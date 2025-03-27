@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, User, Project } from "@/generated/prisma";
+import { User, Project } from "@/generated/prisma";
+import prisma from "@/lib/prisma";
 
 export enum AuthOrigin {
   Divizend = "divizend",
@@ -21,7 +22,6 @@ export function withAuth<Params extends Record<string, string>>(
   ) => Promise<NextResponse>
 ) {
   return async (req: NextRequest, { params }: { params: Promise<Params> }) => {
-    const prisma = new PrismaClient();
     const actualParams = await params;
 
     try {
@@ -80,8 +80,6 @@ export function withProjectAdminAuth<
 ) {
   // Use withAuth as the base and add additional project admin check
   return withAuth(async (req: NextRequest, user: User, params: Params) => {
-    const prisma = new PrismaClient();
-
     try {
       // Extract the slug from params
       const { slug } = params;

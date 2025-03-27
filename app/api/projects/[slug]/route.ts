@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@/generated/prisma";
 import { withAuth, withProjectAdminAuth } from "@/lib/auth";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // Helper function to validate slug format
 function validateSlug(slug: string): boolean {

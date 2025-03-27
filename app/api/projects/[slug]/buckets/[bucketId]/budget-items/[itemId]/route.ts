@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@/generated/prisma";
 import { withAuth, withProjectAdminAuth } from "@/lib/auth";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // GET - Fetch a single budget item
 export const GET = withAuth(async (request: NextRequest, user, { itemId }) => {
