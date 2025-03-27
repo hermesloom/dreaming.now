@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 // POST - Create, update or delete a pledge
 export const POST = withAuth(
-  async (request: NextRequest, user, { slug, bucketId }) => {
+  async (request: NextRequest, user, { bucketId }) => {
     try {
       const { amount } = await request.json();
 

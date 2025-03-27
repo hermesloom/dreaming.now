@@ -70,11 +70,9 @@ export async function POST(
       },
     });
 
-    let updatedFunds;
-
     if (existingFunds) {
       // Update existing record
-      updatedFunds = await prisma.userProjectFunds.update({
+      await prisma.userProjectFunds.update({
         where: { id: existingFunds.id },
         data: {
           fundsLeft: { increment: payload.amount },
@@ -82,7 +80,7 @@ export async function POST(
       });
     } else {
       // Create new record
-      updatedFunds = await prisma.userProjectFunds.create({
+      await prisma.userProjectFunds.create({
         data: {
           user: { connect: { id: payload.userId } },
           project: { connect: { id: project.id } },

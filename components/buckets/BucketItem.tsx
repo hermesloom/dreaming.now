@@ -51,9 +51,6 @@ export default function BucketItem({
   const totalBudget =
     bucket.budgetItems?.reduce((sum, item) => sum + item.amount, 0) || 0;
 
-  const totalPledged =
-    bucket.pledges?.reduce((sum, pledge) => sum + pledge.amount, 0) || 0;
-
   // Add the progressPercentage calculation
   const progressPercentage = calculateBucketProgress(bucket);
 

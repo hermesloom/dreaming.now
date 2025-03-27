@@ -31,7 +31,7 @@ export const GET = withAuth(async (request: NextRequest, user, { slug }) => {
 
 // POST - Create a new bucket
 export const POST = withProjectAdminAuth(
-  async (request: NextRequest, user, project, { slug }) => {
+  async (request: NextRequest, user, project) => {
     try {
       const { title, description } = await request.json();
 
