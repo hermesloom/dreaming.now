@@ -12,8 +12,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { fetchAuth } from "@/lib/fetch";
 import ReactMarkdown from "react-markdown";
 import BucketProgressBar from "@/components/buckets/BucketProgressBar";

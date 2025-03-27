@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { fetchAuth } from "@/lib/fetch";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import ProjectFunds from "@/components/projects/ProjectFunds";
