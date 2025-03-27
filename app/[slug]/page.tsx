@@ -46,6 +46,7 @@ export default function ProjectDetail() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [currentBucket, setCurrentBucket] = useState<Bucket | null>(null);
   const [isReloading, setIsReloading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch project and buckets
   const fetchProject = async () => {
@@ -61,6 +62,7 @@ export default function ProjectDetail() {
     } catch (error) {
       console.error("Error fetching project:", error);
       toast.error("Failed to load project");
+      setError("Failed to load project");
     } finally {
       setIsLoading(false);
       setIsReloading(false);
@@ -119,6 +121,10 @@ export default function ProjectDetail() {
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-destructive">{error}</p>
           </div>
         ) : project ? (
           <>
