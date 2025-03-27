@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma";
-import { withAuth } from "@/lib/auth";
+import { withAuth, withProjectAdminAuth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -35,8 +35,8 @@ export const GET = withAuth(
 );
 
 // PUT - Update a bucket
-export const PUT = withAuth(
-  async (request: NextRequest, user, { bucketId }) => {
+export const PUT = withProjectAdminAuth(
+  async (request: NextRequest, user, project, { bucketId }) => {
     try {
       const { title, description, status } = await request.json();
 
@@ -79,8 +79,8 @@ export const PUT = withAuth(
 );
 
 // DELETE - Delete a bucket
-export const DELETE = withAuth(
-  async (request: NextRequest, user, { bucketId }) => {
+export const DELETE = withProjectAdminAuth(
+  async (request: NextRequest, user, project, { bucketId }) => {
     try {
       const existingBucket = await prisma.bucket.findUnique({
         where: { id: bucketId },

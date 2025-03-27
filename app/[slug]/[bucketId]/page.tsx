@@ -207,14 +207,16 @@ export default function BucketDetail() {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Budget Items</h2>
-                <Button
-                  size="sm"
-                  onClick={() => setAddBudgetItemOpen(true)}
-                  disabled={bucket.status !== "OPEN"}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add Item
-                </Button>
+                {project.isAdmin ? (
+                  <Button
+                    size="sm"
+                    onClick={() => setAddBudgetItemOpen(true)}
+                    disabled={bucket.status !== "OPEN"}
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                ) : null}
               </div>
 
               {bucket.budgetItems.length > 0 ? (
@@ -222,7 +224,9 @@ export default function BucketDetail() {
                   <div className="bg-muted/50 p-3 hidden md:flex text-sm font-medium text-muted-foreground">
                     <div className="flex-1">Description</div>
                     <div className="w-32 text-right">Amount</div>
-                    {bucket.status === "OPEN" && <div className="w-24"></div>}
+                    {bucket.status === "OPEN" && project.isAdmin && (
+                      <div className="w-24"></div>
+                    )}
                   </div>
                   <div className="divide-y">
                     {bucket.budgetItems.map((item) => (
@@ -236,8 +240,8 @@ export default function BucketDetail() {
                         <div className="w-full md:w-32 text-left md:text-right font-medium mb-2 md:mb-0">
                           {formatCurrency(item.amount, item.currency)}
                         </div>
-                        {bucket.status === "OPEN" && (
-                          <div className="w-full md:w-24 flex justify-end space-x-2">
+                        {bucket.status === "OPEN" && project.isAdmin && (
+                          <div className="w-full md:w-24 flex justify-start space-x-2">
                             <Button
                               variant="ghost"
                               size="icon"

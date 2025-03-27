@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma";
-import { withAuth } from "@/lib/auth";
+import { withAuth, withProjectAdminAuth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -25,8 +25,8 @@ export const GET = withAuth(
 );
 
 // POST - Create a new budget item
-export const POST = withAuth(
-  async (request: NextRequest, user, { bucketId }) => {
+export const POST = withProjectAdminAuth(
+  async (request: NextRequest, user, project, { bucketId }) => {
     try {
       const { description, amount } = await request.json();
 

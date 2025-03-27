@@ -148,6 +148,7 @@ export default function ProjectDetail() {
               setSearchQuery={setSearchQuery}
               onCreateClick={() => setCreateDialogOpen(true)}
               hasBuckets={buckets.length > 0}
+              isAdmin={project.isAdmin}
             />
 
             <ProjectFunds
@@ -159,23 +160,27 @@ export default function ProjectDetail() {
 
             {filteredBuckets.length === 0 ? (
               <div className="text-center py-12 border rounded-lg">
-                <h3 className="text-lg font-medium mb-2">
+                <h3 className="text-lg font-medium">
                   {searchQuery
-                    ? "No matching buckets found"
-                    : "No buckets created yet"}
+                    ? "No matching buckets found."
+                    : "No buckets created yet."}
                 </h3>
-                <p className="text-muted-foreground mb-4">
-                  {searchQuery
-                    ? "Try a different search term"
-                    : "Create your first bucket to get started."}
-                </p>
-                {!searchQuery && buckets.length === 0 && (
-                  <div className="flex justify-center">
-                    <AddBucketButton
-                      onCreateClick={() => setCreateDialogOpen(true)}
-                    />
-                  </div>
-                )}
+                {project.isAdmin ? (
+                  <>
+                    <p className="text-muted-foreground mb-4 mt-2">
+                      {searchQuery
+                        ? "Try a different search term"
+                        : "Create your first bucket to get started."}
+                    </p>
+                    {!searchQuery && buckets.length === 0 && (
+                      <div className="flex justify-center">
+                        <AddBucketButton
+                          onCreateClick={() => setCreateDialogOpen(true)}
+                        />
+                      </div>
+                    )}
+                  </>
+                ) : null}
               </div>
             ) : (
               <div className="border rounded-lg overflow-hidden divide-y">
@@ -186,7 +191,7 @@ export default function ProjectDetail() {
                     projectSlug={project.slug}
                     onEdit={() => handleEditBucket(bucket)}
                     onDelete={() => handleDeleteBucket(bucket)}
-                    onFundsAssigned={fetchProject}
+                    isAdmin={project.isAdmin}
                   />
                 ))}
               </div>

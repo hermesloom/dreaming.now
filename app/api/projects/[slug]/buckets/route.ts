@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma";
-import { withAuth } from "@/lib/auth";
+import { withAuth, withProjectAdminAuth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -32,40 +32,33 @@ export const GET = withAuth(async (request: NextRequest, user, { slug }) => {
 });
 
 // POST - Create a new bucket
-export const POST = withAuth(async (request: NextRequest, user, { slug }) => {
-  try {
-    const { title, description } = await request.json();
+export const POST = withProjectAdminAuth(
+  async (request: NextRequest, user, project, { slug }) => {
+    try {
+      const { title, description } = await request.json();
 
-    if (!title || !description) {
+      if (!title || !description) {
+        return NextResponse.json(
+          { error: "Title and description are required" },
+          { status: 400 }
+        );
+      }
+
+      const newBucket = await prisma.bucket.create({
+        data: {
+          title,
+          description,
+          projectId: project.id,
+        },
+      });
+
+      return NextResponse.json(newBucket);
+    } catch (error) {
+      console.error("Error creating bucket:", error);
       return NextResponse.json(
-        { error: "Title and description are required" },
-        { status: 400 }
+        { error: "Failed to create bucket" },
+        { status: 500 }
       );
     }
-
-    const project = await prisma.project.findUnique({
-      where: { slug },
-      select: { id: true },
-    });
-
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
-
-    const newBucket = await prisma.bucket.create({
-      data: {
-        title,
-        description,
-        projectId: project.id,
-      },
-    });
-
-    return NextResponse.json(newBucket);
-  } catch (error) {
-    console.error("Error creating bucket:", error);
-    return NextResponse.json(
-      { error: "Failed to create bucket" },
-      { status: 500 }
-    );
   }
-});
+);

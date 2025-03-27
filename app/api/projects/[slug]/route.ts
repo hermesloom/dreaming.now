@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma";
-import { withAuth } from "@/lib/auth";
+import { withAuth, withProjectAdminAuth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -36,6 +36,10 @@ export const GET = withAuth(async (request: NextRequest, user, { slug }) => {
         },
         userFunds: {
           where: { userId: user.id },
+          select: {
+            fundsLeft: true,
+            isAdmin: true,
+          },
         },
       },
     });
@@ -46,10 +50,12 @@ export const GET = withAuth(async (request: NextRequest, user, { slug }) => {
 
     // Calculate total funds left for the user in this project
     const fundsLeft = project.userFunds[0]?.fundsLeft || 0;
+    const isAdmin = project.userFunds[0]?.isAdmin || false;
 
     return NextResponse.json({
       ...project,
       fundsLeft,
+      isAdmin,
     });
   } catch (error) {
     console.error("Error fetching project:", error);
@@ -61,104 +67,99 @@ export const GET = withAuth(async (request: NextRequest, user, { slug }) => {
 });
 
 // PUT - Update a project
-export const PUT = withAuth(async (request: NextRequest, user, { slug }) => {
-  try {
-    const { name, description, newSlug } = await request.json();
+export const PUT = withProjectAdminAuth(
+  async (request: NextRequest, user, project, { slug }) => {
+    try {
+      const { name, description, newSlug } = await request.json();
 
-    if (!name && !description && !newSlug) {
-      return NextResponse.json(
-        { error: "At least one field to update is required" },
-        { status: 400 }
-      );
-    }
-
-    const existingProject = await prisma.project.findUnique({
-      where: { slug },
-    });
-
-    if (!existingProject) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
-
-    // If slug is being updated, validate it
-    if (newSlug && newSlug !== slug) {
-      // Validate the slug format
-      if (!validateSlug(newSlug)) {
+      if (!name && !description && !newSlug) {
         return NextResponse.json(
-          {
-            error:
-              "Slug must contain only lowercase letters, numbers, and hyphens. Cannot start or end with a hyphen.",
-          },
+          { error: "At least one field to update is required" },
           { status: 400 }
         );
       }
 
-      // Check if the new slug is already in use
-      const slugExists = await prisma.project.findUnique({
-        where: { slug: newSlug },
+      // If slug is being updated, validate it
+      if (newSlug && newSlug !== slug) {
+        // Validate the slug format
+        if (!validateSlug(newSlug)) {
+          return NextResponse.json(
+            {
+              error:
+                "Slug must contain only lowercase letters, numbers, and hyphens. Cannot start or end with a hyphen.",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check if the new slug is already in use
+        const slugExists = await prisma.project.findUnique({
+          where: { slug: newSlug },
+        });
+
+        if (slugExists) {
+          return NextResponse.json(
+            {
+              error: "This slug is already in use. Please choose another one.",
+            },
+            { status: 400 }
+          );
+        }
+      }
+
+      const updatedProject = await prisma.project.update({
+        where: { slug },
+        data: {
+          name: name || project.name,
+          description: description || project.description,
+          ...(newSlug && newSlug !== slug ? { slug: newSlug } : {}),
+        },
+        include: {
+          buckets: true,
+        },
       });
 
-      if (slugExists) {
-        return NextResponse.json(
-          { error: "This slug is already in use. Please choose another one." },
-          { status: 400 }
-        );
-      }
+      const projectWithFunds = await prisma.userProjectFunds.findFirst({
+        where: {
+          projectId: updatedProject.id,
+          userId: user.id,
+        },
+        select: {
+          fundsLeft: true,
+          isAdmin: true,
+        },
+      });
+
+      return NextResponse.json({
+        ...updatedProject,
+        fundsLeft: projectWithFunds?.fundsLeft || 0,
+        isAdmin: projectWithFunds?.isAdmin || false,
+      });
+    } catch (error) {
+      console.error("Error updating project:", error);
+      return NextResponse.json(
+        { error: "Failed to update project" },
+        { status: 500 }
+      );
     }
-
-    const updatedProject = await prisma.project.update({
-      where: { slug },
-      data: {
-        name: name || existingProject.name,
-        description: description || existingProject.description,
-        ...(newSlug && newSlug !== slug ? { slug: newSlug } : {}),
-      },
-      include: {
-        buckets: true,
-      },
-    });
-
-    const projectWithFunds = await prisma.userProjectFunds.findFirst({
-      where: {
-        projectId: updatedProject.id,
-        userId: user.id,
-      },
-    });
-
-    return NextResponse.json({
-      ...updatedProject,
-      fundsLeft: projectWithFunds?.fundsLeft || 0,
-    });
-  } catch (error) {
-    console.error("Error updating project:", error);
-    return NextResponse.json(
-      { error: "Failed to update project" },
-      { status: 500 }
-    );
   }
-});
+);
 
 // DELETE - Delete a project
-export const DELETE = withAuth(async (request: NextRequest, user, { slug }) => {
-  try {
-    const existingProject = await prisma.project.findUnique({
-      where: { slug },
-    });
+export const DELETE = withProjectAdminAuth(
+  async (request: NextRequest, user, project, { slug }) => {
+    try {
+      await prisma.project.delete({
+        where: { slug },
+      });
 
-    if (!existingProject) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      return NextResponse.json(
+        { error: "Failed to delete project" },
+        { status: 500 }
+      );
     }
-
-    await prisma.project.delete({
-      where: { slug },
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting project:", error);
-    return NextResponse.json(
-      { error: "Failed to delete project" },
-      { status: 500 }
-    );
   }
-});
+);

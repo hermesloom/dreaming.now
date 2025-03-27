@@ -32,6 +32,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       ...fund.project,
       fundsLeft: fund.fundsLeft,
       currency: fund.currency,
+      isAdmin: fund.isAdmin,
     }));
 
     return NextResponse.json(projects);

@@ -116,7 +116,7 @@ export default function AssignFundsButton({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div onClick={handleWrapperClick}>
+            <div onClick={handleWrapperClick} className="w-fit">
               <Button
                 size={size}
                 variant={currentPledge ? "default" : "outline"}

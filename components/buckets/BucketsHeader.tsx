@@ -9,6 +9,7 @@ interface BucketsHeaderProps {
   setSearchQuery: (query: string) => void;
   onCreateClick: () => void;
   hasBuckets: boolean;
+  isAdmin: boolean;
 }
 
 export default function BucketsHeader({
@@ -16,6 +17,7 @@ export default function BucketsHeader({
   setSearchQuery,
   onCreateClick,
   hasBuckets,
+  isAdmin,
 }: BucketsHeaderProps) {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 mt-10 gap-3">
@@ -32,7 +34,7 @@ export default function BucketsHeader({
               className="pl-8 w-full"
             />
           </div>
-          <AddBucketButton onCreateClick={onCreateClick} />
+          {isAdmin ? <AddBucketButton onCreateClick={onCreateClick} /> : null}
         </div>
       )}
     </div>

@@ -45,4 +45,5 @@ export interface Project {
   buckets: Bucket[];
   fundsLeft: number;
   currency: string;
+  isAdmin: boolean;
 }
