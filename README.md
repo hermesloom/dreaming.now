@@ -18,6 +18,8 @@
 curl "https://dreaming.now/api/projects/divizend/funds" -X POST --data '{"userId":"<divizend user ID>","amount":10}' -H "X-Webhook-Secret: <uuid>"
 ```
 
+Upon success, this endpoint returns a JSON object like `{"success":true}`.
+
 ## License
 
 GPL
