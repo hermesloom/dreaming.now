@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "@/contexts/SessionContext";
-import { Loader2 } from "lucide-react";
 import LoginButton from "@/components/LoginButton";
 import { usePathname } from "next/navigation";
 
