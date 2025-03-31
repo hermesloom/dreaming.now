@@ -110,16 +110,16 @@ export default function ProjectList() {
           <h3 className="text-lg font-medium mb-2">
             {searchQuery ? "No matching projects found" : "No projects yet"}
           </h3>
-          <p className="text-muted-foreground mb-4">
+          <p className="text-muted-foreground mb-4 px-4">
             {searchQuery
               ? "Try a different search term"
-              : "Create your first project to get started."}
+              : "As soon as you subscribe to the Divizend Companion, €10 in funds for you to distribute will be added to your account every month. Make sure that you log in here with the same Divizend account as in the Companion."}
           </p>
-          {!searchQuery && projects.length === 0 && (
+          {/*!searchQuery && projects.length === 0 && (
             <div className="flex justify-center">
               <CreateProjectDialog onProjectCreated={handleProjectCreated} />
             </div>
-          )}
+          )*/}
         </div>
       ) : (
         <div className="border rounded-md overflow-hidden">
