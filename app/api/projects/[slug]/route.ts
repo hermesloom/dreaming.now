@@ -54,6 +54,7 @@ export const GET = withAuth(async (request: NextRequest, user, { slug }) => {
       ...project,
       fundsLeft,
       isAdmin,
+      webhookSecret: undefined,
     });
   } catch (error) {
     console.error("Error fetching project:", error);
@@ -132,6 +133,7 @@ export const PUT = withProjectAdminAuth(
         ...updatedProject,
         fundsLeft: projectWithFunds?.fundsLeft || 0,
         isAdmin: projectWithFunds?.isAdmin || false,
+        webhookSecret: undefined,
       });
     } catch (error) {
       console.error("Error updating project:", error);

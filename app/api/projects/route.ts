@@ -31,6 +31,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       fundsLeft: fund.fundsLeft,
       currency: fund.currency,
       isAdmin: fund.isAdmin,
+      webhookSecret: undefined,
     }));
 
     return NextResponse.json(projects);
@@ -100,7 +101,13 @@ export const POST = withAuth(async (request: NextRequest, user) => {
         },
       });
 
-      return { ...project, fundsLeft: 0, currency: "EUR", isAdmin: true };
+      return {
+        ...project,
+        fundsLeft: 0,
+        currency: "EUR",
+        isAdmin: true,
+        webhookSecret: undefined,
+      };
     });
 
     return NextResponse.json(result, { status: 201 });
