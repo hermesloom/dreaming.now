@@ -20,6 +20,8 @@ export default function ProjectList() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
 
+  const allowCreateProject = false;
+
   // Fetch projects
   const fetchProjects = async () => {
     try {
@@ -96,7 +98,9 @@ export default function ProjectList() {
                 className="pl-8 w-full"
               />
             </div>
-            {/* <CreateProjectDialog onProjectCreated={handleProjectCreated} /> */}
+            {allowCreateProject && (
+              <CreateProjectDialog onProjectCreated={handleProjectCreated} />
+            )}
           </div>
         )}
       </div>
@@ -115,11 +119,11 @@ export default function ProjectList() {
               ? "Try a different search term"
               : "As soon as you subscribe to the Divizend Companion, €10 in funds for you to distribute will be added to your account every month. Make sure that you log in here with the same Divizend account as in the Companion."}
           </p>
-          {/*!searchQuery && projects.length === 0 && (
+          {allowCreateProject && !searchQuery && projects.length === 0 && (
             <div className="flex justify-center">
               <CreateProjectDialog onProjectCreated={handleProjectCreated} />
             </div>
-          )*/}
+          )}
         </div>
       ) : (
         <div className="border rounded-md overflow-hidden">
