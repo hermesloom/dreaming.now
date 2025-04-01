@@ -5,7 +5,7 @@
 1. Install [Node.js](https://nodejs.org/en) and [pnpm](https://pnpm.io/).
 2. Set up a MongoDB instance.
 3. `cp .env.example .env` and enter the `MONGODB_URI` there.
-4. Uncomment the "Create project" button in `app/page.tsx`, line 118 to 122.
+4. Uncomment the "Create project" buttons in `app/page.tsx`, line 99 and lines 118 to 122.
 5. Run the development server: `pnpm dev`
 6. Open [http://localhost:3005](http://localhost:3005) with your browser to see the result.
 

@@ -96,7 +96,7 @@ export default function ProjectList() {
                 className="pl-8 w-full"
               />
             </div>
-            <CreateProjectDialog onProjectCreated={handleProjectCreated} />
+            {/* <CreateProjectDialog onProjectCreated={handleProjectCreated} /> */}
           </div>
         )}
       </div>
