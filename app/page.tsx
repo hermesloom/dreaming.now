@@ -117,7 +117,7 @@ export default function ProjectList() {
           <p className="text-muted-foreground mb-4 px-4">
             {searchQuery
               ? "Try a different search term"
-              : "As soon as you subscribe to the Divizend Companion, €10 in funds for you to distribute will be added to your account every month. Make sure that you log in here with the same Divizend account as in the Companion."}
+              : "As soon as an administrator adds funds to your account, the respective project(s) will appear here."}
           </p>
           {allowCreateProject && !searchQuery && projects.length === 0 && (
             <div className="flex justify-center">

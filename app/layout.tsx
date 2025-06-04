@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "dreaming.now",
-  description: "A platform for collaborative dreaming and resource allocation.",
+  description: "A platform for collaborative budget allocation.",
 };
 
 export default function RootLayout({

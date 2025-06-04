@@ -22,7 +22,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
               Welcome to dreaming.now
             </h1>
             <p className="text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
-              A platform for collaborative dreaming and resource allocation.
+              A platform for collaborative budget allocation.
             </p>
           </div>
           <div className="flex justify-center">
