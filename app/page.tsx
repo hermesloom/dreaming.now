@@ -20,7 +20,7 @@ export default function ProjectList() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
 
-  const allowCreateProject = false;
+  const allowCreateProject = true;
 
   // Fetch projects
   const fetchProjects = async () => {
