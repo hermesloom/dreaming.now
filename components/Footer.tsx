@@ -24,30 +24,6 @@ export default function Footer() {
             <Github size={12} />
             GitHub
           </Link>
-          <Link
-            href="https://discord.gg/4ArHzm3E"
-            className="hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Discord
-          </Link>
-          <Link
-            href="https://divizend.com/imprint"
-            className="hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Imprint
-          </Link>
-          <Link
-            href="https://divizend.com/data-protection"
-            className="hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Data Protection
-          </Link>
         </div>
       </div>
     </footer>
