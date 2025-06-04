@@ -1,5 +1,15 @@
 # dreaming.now
 
+## Try it
+
+1. Go to https://dreaming.now
+2. Login with these credentials:
+   - email: demo+dreaming.now@divizend.com
+   - password: 12345678
+3. Play around in the platform! Feel free to assign funds within the "My Awesome Community" project and create new projects, buckets and budget items.
+
+If you'd like to assign funds to an account to use it productively, please contact me at julian@dreaming.now.
+
 ## Getting Started
 
 1. Install [Node.js](https://nodejs.org/en) and [pnpm](https://pnpm.io/).
